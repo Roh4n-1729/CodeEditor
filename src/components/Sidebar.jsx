@@ -5,6 +5,7 @@ import {
   ListItemText,
   ListItemIcon,
   Collapse,
+  Box,
 } from "@mui/material";
 
 import {
@@ -15,7 +16,12 @@ import { useState } from "react";
 
 const File = ({ name, onClick, file }) => {
   return (
-    <ListItemButton onClick={() => onClick(file)}>
+    <ListItemButton
+      onClick={(event) => {
+        onClick(file);
+        event.stopPropagation();
+      }}
+    >
       <ListItemIcon>
         <FileIcon
           sx={{
@@ -80,88 +86,67 @@ const FolderItem = ({ name, children, onClick, file }) => {
   );
 };
 
-export const Sidebar = ({ setSelectedFile }) => {
-  const filetree = [
-    {
-      type: "folder",
-      name: "Documents",
-      path: "/Documents",
-      children: [
-        { type: "file", name: "Resume.pdf", path: "/Documents/Resume.pdf" },
-        { type: "file", name: "Resume.ipynb", path: "/Documents/Resume.ipynb" },
-        { type: "file", name: "Resume.jpg", path: "/Documents/Resume.jpg" },
-        {
-          type: "file",
-          name: "CoverLetter.docx",
-          path: "/Documents/CoverLetter.docx",
-        },
-        {
-          type: "folder",
-          name: "Projects",
-          path: "/Documents/Projects",
-          children: [
-            {
-              type: "file",
-              name: "Project1.txt",
-              path: "/Documents/Projects/Project1.txt",
-            },
-            {
-              type: "file",
-              name: "Project2.js",
-              path: "/Documents/Projects/Project2.js",
-            },
-            {
-              type: "folder",
-              name: "SubFolder",
-              path: "/Documents/Projects/SubFolder",
-              children: [
-                {
-                  type: "file",
-                  name: "Notes.md",
-                  path: "/Documents/Projects/SubFolder/Notes.md",
-                },
-              ],
-            },
-          ],
-        },
-      ],
-    },
-    {
-      type: "folder",
-      name: "Pictures",
-      path: "/Pictures",
-      children: [
-        { type: "file", name: "Vacation.jpg", path: "/Pictures/Vacation.jpg" },
-        { type: "file", name: "Family.png", path: "/Pictures/Family.png" },
-      ],
-    },
-    { type: "file", name: "todo.txt", path: "/todo.txt" },
-  ];
-
+export const Sidebar = ({ setSelectedFile, filetree }) => {
   return (
-    <List>
-      {filetree.map((file, index) => {
-        if (file.type === "file")
-          return (
-            <File
-              name={file.name}
-              onClick={setSelectedFile}
-              key={index}
-              file={file}
-            />
-          );
-        else
-          return (
-            <FolderItem
-              key={index}
-              onClick={setSelectedFile}
-              name={file.name}
-              file={file}
-            >
-              {file.children}
-            </FolderItem>
-          );
-      })}
-    </List>
+    <Box
+      onClick={(event) => {
+        setSelectedFile({ type: "root" });
+        console.log("hrererererer");
+        event.stopPropagation();
+      }}
+      sx={{
+        height: "100vh",
+        overflowY: "scroll",
+        overflowX: "hidden",
+        "&::-webkit-scrollbar": { width: "0.4em" },
+        "&::-webkit-scrollbar-track": {
+          "-webkit-box-shadow": "inset 0 0 6px rgba(0,0,0,0.00)",
+        },
+        "&::-webkit-scrollbar-thumb": {
+          backgroundColor: "rgba(0,0,0,.1)",
+          outline: "1px solid slategrey",
+        },
+        "&::-webkit-scrollbar-corner": { backgroundColor: "transparent" },
+        backgroundColor: "black",
+        color: "white",
+        padding: "10px",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "flex-start",
+        justifyContent: "flex-start",
+        gap: "10px",
+        minWidth: "200px",
+        maxWidth: "200px",
+        borderRight: "1px solid white",
+        position: "sticky",
+        top: 0,
+        zIndex: 1,
+      }}
+    >
+      <List>
+        {filetree.map((file, index) => {
+          if (file.type === "file")
+            return (
+              <File
+                name={file.name}
+                onClick={setSelectedFile}
+                key={index}
+                file={file}
+              />
+            );
+          else
+            return (
+              <FolderItem
+                key={index}
+                onClick={setSelectedFile}
+                name={file.name}
+                file={file}
+              >
+                {file.children}
+              </FolderItem>
+            );
+        })}
+      </List>
+    </Box>
   );
 };
