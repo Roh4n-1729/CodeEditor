@@ -248,7 +248,7 @@
 
 import React from "react";
 import { concatMultilineString } from "./helpers";
-import { getTransform } from "./transforms";
+import { getTransform } from "./transformss";
 
 // Dummy constants and clipboard implementation
 export const OpenImageInPlotViewer = "openImageInPlotViewer";
