@@ -5,5 +5,6 @@ import LaTeX from "./latex";
 import Markdown from "./markdown";
 import Plain from "./plain";
 import SVG from "./svg";
+import Json from "./json";
 
-export { HTML, Image, JavaScript, LaTeX, Markdown, Plain, SVG };
+export { HTML, Image, JavaScript, LaTeX, Markdown, Plain, SVG, Json };

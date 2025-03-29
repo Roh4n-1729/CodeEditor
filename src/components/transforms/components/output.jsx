@@ -41,7 +41,7 @@ ErrorFallback.propTypes = {
  */
 const OutputContent = ({ output, children }) => {
   if (!output) return null;
-
+  console.log("outputTypessss", output);
   const outputType = output.output_type;
 
   let chosenOne = null;
@@ -50,11 +50,14 @@ const OutputContent = ({ output, children }) => {
     if (!React.isValidElement(child)) return;
 
     const childOutputType = child.props.output_type;
+    console.log("childOutputType", childOutputType);
     if (childOutputType) {
       const childTypes = Array.isArray(childOutputType)
         ? childOutputType
         : [childOutputType];
+      console.log("childTypes", childTypes, outputType);
       if (childTypes.includes(outputType)) {
+        console.log("childTypes", childTypes);
         chosenOne = child;
       }
     }

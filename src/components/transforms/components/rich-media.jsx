@@ -1,35 +1,5 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { ErrorBoundary } from "react-error-boundary";
-
-/**
- * Default error fallback UI rendered when an error is caught.
- */
-function DefaultErrorFallback({ error, componentStack }) {
-  return (
-    <div
-      style={{
-        backgroundColor: "ghostwhite",
-        color: "black",
-        fontWeight: 600,
-        display: "block",
-        padding: "10px",
-        marginBottom: "20px",
-      }}
-    >
-      <h3>{error.toString()}</h3>
-      <details>
-        <summary>stack trace</summary>
-        <pre>{componentStack}</pre>
-      </details>
-    </div>
-  );
-}
-
-DefaultErrorFallback.propTypes = {
-  error: PropTypes.instanceOf(Error).isRequired,
-  componentStack: PropTypes.string.isRequired,
-};
 
 /**
  * Helper function to choose the first child element whose `mediaType`
@@ -37,7 +7,6 @@ DefaultErrorFallback.propTypes = {
  */
 function chooseChild(children, data) {
   let chosenOne = null;
-
   React.Children.forEach(children, (child) => {
     if (chosenOne) return;
     if (!React.isValidElement(child)) return;
@@ -85,30 +54,11 @@ InnerRichMedia.propTypes = {
  * RichMedia wraps InnerRichMedia in an error boundary.
  * If an error is caught, the `renderError` function is used to display it.
  */
-function RichMedia({
-  data = {},
-  metadata = {},
-  children,
-  renderError = ({ error, info, data, metadata, children }) => (
-    <DefaultErrorFallback error={error} componentStack={info.componentStack} />
-  ),
-}) {
+function RichMedia({ data = {}, metadata = {}, children }) {
   return (
-    <ErrorBoundary
-      fallbackRender={({ error, resetErrorBoundary, componentStack }) =>
-        renderError({
-          error,
-          info: { componentStack },
-          data,
-          metadata,
-          children,
-        })
-      }
-    >
-      <InnerRichMedia data={data} metadata={metadata}>
-        {children}
-      </InnerRichMedia>
-    </ErrorBoundary>
+    <InnerRichMedia data={data} metadata={metadata}>
+      {children}
+    </InnerRichMedia>
   );
 }
 

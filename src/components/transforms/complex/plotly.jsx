@@ -1,6 +1,6 @@
 import React, { useRef, useEffect } from "react";
 import PropTypes from "prop-types";
-import Plotly from "plotly.js";
+import Plotly from "plotly.js-dist";
 import cloneDeep from "lodash.clonedeep";
 
 const MIMETYPE = "application/vnd.plotly.v1+json";

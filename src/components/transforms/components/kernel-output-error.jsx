@@ -1,6 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
-import Ansi from "react-ansi";
+import Ansi from "@curvenote/ansi-to-react";
 
 const KernelOutputError = ({
   output,
@@ -28,6 +28,7 @@ const KernelOutputError = ({
       <Ansi linkify={linkify} useClasses={useClasses}>
         {kernelOutputError.join("\n")}
       </Ansi>
+      {/* <ReactAnsi log={kernelOutputError.join("\n")} /> */}
     </div>
   );
 };

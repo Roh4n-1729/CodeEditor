@@ -1,10 +1,13 @@
 import React from "react";
 import PropTypes from "prop-types";
-import Ansi from "react-ansi";
+import ReactAnsi from "react-ansi";
+import Ansi from "@curvenote/ansi-to-react";
 
 const Plain = ({ data = "", mediaType = "text/plain" }) => (
   <pre>
-    <Ansi linkify>{data}</Ansi>
+    <ReactAnsi log={data} />
+    {console.log("dataasdasdas", data)}
+    {/* <Ansi linkify>{data}</Ansi> */}
   </pre>
 );
 

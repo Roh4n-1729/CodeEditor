@@ -1,6 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
-import Ansi from "react-ansi";
+// import ReactAnsi from "react-ansi";
+import Ansi from "@curvenote/ansi-to-react";
 
 const StreamText = ({
   output,
@@ -18,8 +19,9 @@ const StreamText = ({
       className={`nteract-display-area-${name}`}
       useClasses={useClasses}
     >
-      {text}
+      {Array.isArray(text) ? text.join("\n") : text}
     </Ansi>
+    // <ReactAnsi log={text} />
   );
 };
 
