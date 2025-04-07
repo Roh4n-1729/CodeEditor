@@ -3,7 +3,9 @@ import PropTypes from "prop-types";
 import ReactMarkdown from "react-markdown";
 
 const Markdown = ({ data = "", mediaType = "text/markdown" }) => {
-  return <ReactMarkdown>{data}</ReactMarkdown>;
+  return (
+    <ReactMarkdown>{Array.isArray(data) ? data.join("") : data}</ReactMarkdown>
+  );
 };
 
 Markdown.propTypes = {

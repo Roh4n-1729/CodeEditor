@@ -43,6 +43,7 @@ import vegaEmbed from "vega-embed";
 import { Vega } from "react-vega";
 import Cal from "./components/calculate";
 import JupyterHub from "./components/JupyterHub";
+import { Plain } from "./components/transforms/components/media";
 
 // Helper function to find node by path
 const findNodeByPath = (nodes, targetPath) => {
@@ -68,9 +69,9 @@ function App() {
     cells,
     setCells,
   } = useEditor();
-  const [activatedCell, setActivatedCell] = useState(null);
+  const [activatedCell, setActivatedCell] = useState(-1);
   const handleToggleActiveCellType = () => {
-    if (activatedCell === null) return; // no active cell
+    if (activatedCell === -1) return; // no active cell
     setCells((prevCells) => {
       const newCells = [...prevCells];
       const currentType = newCells[activatedCell].cell_type;
@@ -716,6 +717,7 @@ function App() {
         }}
       /> */}
       <Button onClick={handleToggleActiveCellType}>Change to markdown</Button>
+
       <JupyterHub
         cells={cells}
         setCells={setCells}

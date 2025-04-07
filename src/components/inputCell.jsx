@@ -288,19 +288,31 @@
 
 import React, { useCallback, useMemo, useState } from "react";
 import PropTypes from "prop-types";
-import { Box, ClickAwayListener, Paper, IconButton } from "@mui/material";
+import {
+  Box,
+  ClickAwayListener,
+  Paper,
+  IconButton,
+  TextField,
+} from "@mui/material";
 import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
 import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 import MonacoEditor from "@monaco-editor/react";
 import ReactMarkdown from "react-markdown";
 
-const InputCell = ({ data, index, setCells, setActivatedCell }) => {
+const InputCell = ({
+  data,
+  index,
+  setCells,
+  activatedCell,
+  setActivatedCell,
+}) => {
   const [isSelected, setIsSelected] = useState(false);
   const [isEditingMarkdown, setIsEditingMarkdown] = useState(false);
-  console.log("re-render input cell", index);
+  console.log("activatedCell", activatedCell, index);
 
   const codeValue = useMemo(() => data.source.join("\n"), [data.source]);
-
+  console.log("rere render input cell", index);
   const handleCodeChange = useCallback(
     (value) => {
       setCells((prev) => {
@@ -325,7 +337,6 @@ const InputCell = ({ data, index, setCells, setActivatedCell }) => {
 
   // When the cell is clicked, update active cell state
   const handleClick = useCallback(() => {
-    setIsSelected(true);
     setActivatedCell(index);
     if (data.cell_type === "markdown") {
       setIsEditingMarkdown(true);
@@ -334,7 +345,7 @@ const InputCell = ({ data, index, setCells, setActivatedCell }) => {
 
   // Handler to move this cell up
   const handleMoveUp = useCallback(() => {
-    setIsSelected(false);
+    setActivatedCell(-1);
     setIsEditingMarkdown(false);
     setCells((prev) => {
       if (index === 0) return prev;
@@ -349,7 +360,7 @@ const InputCell = ({ data, index, setCells, setActivatedCell }) => {
 
   // Handler to move this cell down
   const handleMoveDown = useCallback(() => {
-    setIsSelected(false);
+    setActivatedCell(-1);
     setIsEditingMarkdown(false);
     setCells((prev) => {
       if (index === prev.length - 1) return prev;
@@ -361,70 +372,104 @@ const InputCell = ({ data, index, setCells, setActivatedCell }) => {
       return newCells;
     });
   }, [index, setCells]);
-  console.log("re-render input cell", index);
+
   return (
     <ClickAwayListener
       onClickAway={() => {
-        setIsSelected(false);
-        setIsEditingMarkdown(false);
+        if (activatedCell === index) {
+          setActivatedCell(-1);
+          setIsEditingMarkdown(false);
+        }
       }}
     >
-      <Paper
-        elevation={isSelected ? 3 : 1}
+      {/* <Box sx={{ display: "flex", flexGrow: 1 }}> */}
+      <Box
         sx={{
           position: "relative",
-          border: isSelected ? "2px solid #0078d7" : "none",
-          borderRadius: "5px",
-          overflow: "hidden",
-          background: isSelected ? "white" : "#f5f5f5",
-          mb: 2,
+          border: "none",
+          display: "flex",
+          flexGrow: 1,
+          borderLeft: activatedCell === index ? "2px solid #0078d7" : "none",
+          pl: 1,
+        }}
+        onFocus={() => {
+          setActivatedCell(index);
         }}
       >
-        <Box sx={{ position: "relative" }}>
-          {/* Floating Menu */}
-          {isSelected && (
-            <Box
+        {/* Floating Menu */}
+        {activatedCell === index && (
+          <Box
+            sx={{
+              position: "absolute",
+              top: 4,
+              right: 4,
+              zIndex: 10,
+              display: "flex",
+              gap: 0.5,
+            }}
+          >
+            <IconButton size="small" onClick={handleMoveUp}>
+              <ArrowUpwardIcon fontSize="small" />
+            </IconButton>
+            <IconButton size="small" onClick={handleMoveDown}>
+              <ArrowDownwardIcon fontSize="small" />
+            </IconButton>
+          </Box>
+        )}
+
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            overflow: "auto",
+            height: "100%",
+            flexGrow: 1,
+          }}
+          onClick={handleClick}
+        >
+          {/* Jupyter-style prompt number */}
+          <Box
+            sx={{
+              color: "#666",
+              minWidth: "40px",
+              textAlign: "right",
+              pr: 1,
+              fontSize: "14px",
+            }}
+          >
+            [{index + 1}]:
+          </Box>
+          {/* Cell Content */}
+
+          {data.cell_type === "code" && (
+            <TextField
+              multiline
+              fullWidth
+              value={codeValue}
+              onChange={(e) => handleCodeChange(e.target.value)}
+              size="small"
               sx={{
-                position: "absolute",
-                top: 4,
-                right: 4,
-                zIndex: 10,
-                display: "flex",
-                gap: 0.5,
+                textWrap: "wrap",
+                border:
+                  activatedCell === index
+                    ? "0.5px solid #272D55"
+                    : "0.2px solid #656565",
+                borderRadius: "5px",
+                background: activatedCell === index ? "white" : "#F7F7F7",
+                outline: "none",
+                "& .MuiOutlinedInput-notchedOutline": {
+                  border: "none",
+                },
               }}
-            >
-              <IconButton size="small" onClick={handleMoveUp}>
-                <ArrowUpwardIcon fontSize="small" />
-              </IconButton>
-              <IconButton size="small" onClick={handleMoveDown}>
-                <ArrowDownwardIcon fontSize="small" />
-              </IconButton>
-            </Box>
+            />
           )}
 
-          <Box
-            sx={{ p: 1, display: "flex", alignItems: "center" }}
-            onClick={handleClick}
-          >
-            {/* Jupyter-style prompt number */}
-            <Box
-              sx={{
-                color: "#666",
-                minWidth: "40px",
-                textAlign: "right",
-                pr: 1,
-                fontSize: "14px",
-              }}
-            >
-              [{index + 1}]:
-            </Box>
-
-            {/* Cell Content */}
-            <Box flex={1}>
-              {data.cell_type === "code" && (
+          {data.cell_type === "markdown" && (
+            <>
+              {isEditingMarkdown ? (
                 <MonacoEditor
                   height="150px"
-                  language="python"
+                  language="markdown"
                   theme="vs-light"
                   value={codeValue}
                   options={{
@@ -435,58 +480,29 @@ const InputCell = ({ data, index, setCells, setActivatedCell }) => {
                     scrollBeyondLastLine: false,
                     automaticLayout: true,
                   }}
-                  onChange={handleCodeChange}
+                  onChange={handleMarkdownChange}
                   onMount={(editor) => {
                     editor.onDidFocusEditorWidget(() => {
-                      setIsSelected(true);
                       setActivatedCell(index);
                     });
-                    // editor.onDidBlurEditorWidget(() => setIsSelected(false));
+                    editor.onDidBlurEditorWidget(() => {
+                      setIsEditingMarkdown(false);
+                    });
                   }}
                 />
+              ) : (
+                <Box
+                  sx={{ cursor: "pointer" }}
+                  onClick={() => setIsEditingMarkdown(true)}
+                >
+                  <ReactMarkdown>{codeValue}</ReactMarkdown>
+                </Box>
               )}
-
-              {data.cell_type === "markdown" && (
-                <>
-                  {isEditingMarkdown ? (
-                    <MonacoEditor
-                      height="150px"
-                      language="markdown"
-                      theme="vs-light"
-                      value={codeValue}
-                      options={{
-                        minimap: { enabled: false },
-                        lineNumbers: "off",
-                        glyphMargin: false,
-                        folding: false,
-                        scrollBeyondLastLine: false,
-                        automaticLayout: true,
-                      }}
-                      onChange={handleMarkdownChange}
-                      onMount={(editor) => {
-                        editor.onDidFocusEditorWidget(() => {
-                          setIsSelected(true);
-                          setActivatedCell(index);
-                        });
-                        editor.onDidBlurEditorWidget(() => {
-                          setIsEditingMarkdown(false);
-                        });
-                      }}
-                    />
-                  ) : (
-                    <Box
-                      sx={{ cursor: "pointer" }}
-                      onClick={() => setIsEditingMarkdown(true)}
-                    >
-                      <ReactMarkdown>{codeValue}</ReactMarkdown>
-                    </Box>
-                  )}
-                </>
-              )}
-            </Box>
-          </Box>
+            </>
+          )}
         </Box>
-      </Paper>
+      </Box>
+      {/* </Box> */}
     </ClickAwayListener>
   );
 };

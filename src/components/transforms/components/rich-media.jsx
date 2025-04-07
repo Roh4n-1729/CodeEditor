@@ -17,11 +17,12 @@ function chooseChild(children, data) {
       chosenOne = chooseChild(child.props.children, data);
       return;
     }
-
+    console.log("awawawaw", child.props, child.props.mediaType, data);
     if (child.props && child.props.mediaType && child.props.mediaType in data) {
       chosenOne = child;
     }
   });
+  console.log("hrererer", chosenOne);
 
   return chosenOne;
 }
@@ -37,6 +38,13 @@ function InnerRichMedia({ data = {}, metadata = {}, children }) {
 
   if (!chosenOne || !chosenOne.props.mediaType) return null;
 
+  console.log(
+    "aaaaaaaaaaaaaaaaaaa",
+    chosenOne,
+    mediaType,
+    data[mediaType],
+    metadata[mediaType]
+  );
   const mediaType = chosenOne.props.mediaType;
   return React.cloneElement(chosenOne, {
     data: data[mediaType],

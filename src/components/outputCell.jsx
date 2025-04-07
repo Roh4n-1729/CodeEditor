@@ -19,21 +19,8 @@ import {
 } from "./transforms/components/media";
 import PlotlyTransform from "./transforms/complex/plotly";
 import GeoJSONTransform from "./transforms/complex/geoJson";
-import { Box } from "@mui/material";
-
-function CompositeOutput(props) {
-  const { output, children } = props;
-  console.log("checkkkkk", output);
-  return (
-    <RichMedia data={output.data} metadata={output.metadata}>
-      {children}
-    </RichMedia>
-  );
-}
-CompositeOutput.defaultProps = {
-  output: null,
-  output_type: ["display_data", "execute_result"],
-};
+import { Box, ClickAwayListener } from "@mui/material";
+import { Vega } from "react-vega";
 
 const MIME_COMPONENTS = {
   "text/html": HTML,
@@ -46,131 +33,163 @@ const MIME_COMPONENTS = {
   "image/svg+xml": SVG,
 };
 
+// Mapping from MIME types to their renderer functions
+const mimeRenderers = {
+  "application/vnd.vega.v5+json": (data, index, metadata) => (
+    <Vega
+      spec={data}
+      key={index}
+      mediaType="application/vnd.vega.v5+json"
+      metadata={metadata}
+    />
+  ),
+  "text/html": (data, index, metadata) => (
+    // <RichMedia data={data} key={index}>
+    <HTML data={data} mediaType="text/html" />
+    // </RichMedia>
+  ),
+  "image/png": (data, index, metadata) => (
+    <Image data={data} key={index} mediaType="image/png" metadata={metadata} />
+  ),
+  "image/jpeg": (data, index, metadata) => (
+    <Image data={data} key={index} mediaType="image/jpeg" metadata={metadata} />
+  ),
+  "image/gif": (data, index, metadata) => (
+    <Image data={data} key={index} mediaType="image/gif" metadata={metadata} />
+  ),
+  "image/webp": (data, index, metadata) => (
+    <Image data={data} key={index} mediaType="image/webp" metadata={metadata} />
+  ),
+  "application/javascript": (data, index, metadata) => (
+    <JavaScript
+      data={data}
+      key={index}
+      mediaType="application/javascript"
+      metadata={metadata}
+    />
+  ),
+  "application/json": (data, index, metadata) => (
+    <Json
+      data={data}
+      key={index}
+      mediaType="application/json"
+      metadata={metadata}
+    />
+  ),
+  "text/latex": (data, index, metadata) => (
+    <LaTeX data={data} key={index} mediaType="text/latex" metadata={metadata} />
+  ),
+  "text/markdown": (data, index, metadata) => (
+    <Markdown
+      data={data}
+      key={index}
+      mediaType="text/markdown"
+      metadata={metadata}
+    />
+  ),
+  "text/plain": (data, index, metadata) => (
+    <Plain data={data} key={index} mediaType="text/plain" metadata={metadata} />
+  ),
+  "image/svg+xml": (data, index, metadata) => (
+    <SVG
+      data={data}
+      key={index}
+      mediaType="image/svg+xml"
+      metadata={metadata}
+    />
+  ),
+  "application/vnd.plotly.v1+json": (data, index, metadata) => (
+    <PlotlyTransform
+      data={data}
+      key={index}
+      mediaType="application/vnd.plotly.v1+json"
+      metadata={metadata}
+    />
+  ),
+  "application/vnd.geo+json": (data, index, metadata) => (
+    <GeoJSONTransform
+      data={data}
+      key={index}
+      mediaType="application/vnd.geo+json"
+      metadata={metadata}
+    />
+  ),
+};
+
+// Preferred MIME order in case multiple formats are available.
+const preferredMimeOrder = [
+  "application/vnd.vega.v5+json",
+  "text/html",
+  "image/png",
+  "image/jpeg",
+  "image/gif",
+  "image/webp",
+  "application/javascript",
+  "application/json",
+  "text/latex",
+  "text/markdown",
+  "text/plain",
+  "image/svg+xml",
+  "application/vnd.plotly.v1+json",
+  "application/vnd.geo+json",
+];
+
+const getPreferredMimeType = (data) => {
+  const keys = Object.keys(data ?? {});
+  return preferredMimeOrder.find((mime) => keys.includes(mime)) || keys[0];
+};
+
 const renderOutput = (data, index) => {
-  console.log("data", data);
   if (
-    data.output_type === "execute_result" ||
-    data.output_type === "display_data" ||
-    data.output_type === "update_display_data"
+    data?.output_type === "execute_result" ||
+    data?.output_type === "display_data" ||
+    data?.output_type === "update_display_data"
   ) {
-    const mimeType = Object.keys(data.data)[0];
-    switch (mimeType) {
-      case "text/html":
-        return (
-          <RichMedia data={data.data} key={index}>
-            <HTML mediaType="text/html" />
-          </RichMedia>
-        );
-      case "image/png":
-      case "image/jpeg":
-      case "image/gif":
-      case "image/webp":
-        return (
-          <Image
-            data={data.data[mimeType]}
-            key={index}
-            mediaType={mimeType}
-            metadata={data.metadata}
-          />
-        );
-      case "application/javascript":
-        return (
-          <JavaScript
-            data={data.data[mimeType]}
-            key={index}
-            mediaType={mimeType}
-            metadata={data.metadata}
-          />
-        );
-      case "application/json":
-        return (
-          <Json
-            data={data.data[mimeType]}
-            key={index}
-            mediaType={mimeType}
-            metadata={data.metadata}
-          />
-        );
-      case "text/latex":
-        return (
-          <LaTeX
-            data={data.data[mimeType]}
-            key={index}
-            mediaType={mimeType}
-            metadata={data.metadata}
-          />
-        );
-      case "text/markdown":
-        return (
-          // <Markdown
-          //   data={data.data[mimeType]}
-          //   key={index}
-          //   mediaType={mimeType}
-          //   metadata={data.metadata}
-          // />
-          <>Markdown</>
-        );
-      case "text/plain":
-        return (
-          <Plain
-            data={data.data[mimeType]}
-            key={index}
-            mediaType={mimeType}
-            metadata={data.metadata}
-          />
-        );
-      case "image/svg+xml":
-        return (
-          <SVG
-            data={data.data[mimeType]}
-            key={index}
-            mediaType={mimeType}
-            metadata={data.metadata}
-          />
-        );
-      case "application/vnd.plotly.v1+json":
-        return (
-          <PlotlyTransform
-            data={data.data[mimeType]}
-            key={index}
-            mediaType={mimeType}
-            metadata={data.metadata}
-          />
-        );
-      case "application/vnd.geo+json":
-        return (
-          <GeoJSONTransform
-            data={data.data[mimeType]}
-            key={index}
-            mediaType={mimeType}
-            metadata={data.metadata}
-          />
-        );
-      default:
-        return <Box> MIME not supported</Box>;
+    const mimeType = getPreferredMimeType(data?.data);
+    const renderer = mimeRenderers[mimeType];
+    if (renderer) {
+      return renderer(data.data?.[mimeType], index, data?.metadata);
+    } else {
+      // Fallback: if no renderer is defined for this MIME type, try using the second available MIME.
+
+      return <Box>MIME not supported.</Box>;
     }
   }
 
-  if (data.output_type === "stream") {
+  if (data?.output_type === "stream") {
     return <StreamText output={data} key={index} output_type="stream" />;
   }
 
-  if (data.output_type === "error") {
+  if (data?.output_type === "error") {
     return <KernelOutputError output={data} key={index} output_type="error" />;
   }
+
+  return null;
 };
 
-const OutputCell = ({ index, data }) => {
+const OutputCell = ({ cellIndex, data, activatedCell, setActivatedCell }) => {
   return (
-    <div className="output-cell" key={index}>
+    <Box
+      className="output-cell"
+      key={cellIndex}
+      sx={{
+        borderLeft: activatedCell === cellIndex ? "2px solid #0078d7" : "none",
+        pl: 1,
+        flexGrow: 1,
+      }}
+      onClick={(e) => {
+        e.stopPropagation();
+        setActivatedCell(cellIndex);
+      }}
+    >
       {data.outputs.map((output, index) => {
         return (
-          <div key={index} className="output">
+          <Box key={index} className="output">
             {renderOutput(output, index)}
-          </div>
+          </Box>
         );
       })}
-    </div>
+    </Box>
   );
 };
 

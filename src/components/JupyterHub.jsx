@@ -2,11 +2,11 @@ import React from "react";
 import PropTypes from "prop-types";
 import InputCell from "./inputCell";
 import OutputCell from "./outputCell";
+import { Box, Button } from "@mui/material";
 
 const JupyterHub = ({ cells, setCells, activatedCell, setActivatedCell }) => {
-  console.log("re arranged cells", cells);
   return (
-    <div>
+    <Box>
       {cells.map((cell, index) => (
         <div key={cell.id || index}>
           {cell.source && (
@@ -18,10 +18,34 @@ const JupyterHub = ({ cells, setCells, activatedCell, setActivatedCell }) => {
               setActivatedCell={setActivatedCell}
             />
           )}
-          {cell.outputs && <OutputCell index={index} data={cell} />}
+          {cell.outputs && cell.cell_type === "code" && (
+            <OutputCell
+              cellIndex={index}
+              activatedCell={activatedCell}
+              setActivatedCell={setActivatedCell}
+              data={cell}
+            />
+          )}
         </div>
       ))}
-    </div>
+      <Button
+        variant="contained"
+        onClick={() =>
+          setCells((prev) => [
+            ...prev,
+            {
+              cell_type: "code",
+              execution_count: null,
+              metadata: {},
+              outputs: [],
+              source: ["# Add your code here\n"],
+            },
+          ])
+        }
+      >
+        Add Cell
+      </Button>
+    </Box>
   );
 };
 
